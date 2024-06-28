@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -29,9 +29,18 @@ async function run() {
 
     const forestCollection = client.db("forestDB").collection("forest");
 
-    // find a document
+    // find all documents
     app.get("/forest", async (req, res) => {
       const result = await forestCollection.find().toArray();
+      res.send(result);
+    });
+
+    // find a document
+    app.get("/forest/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await forestCollection.findOne(query);
       res.send(result);
     });
 
