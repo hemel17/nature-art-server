@@ -44,6 +44,15 @@ async function run() {
       res.send(result);
     });
 
+    // find user document by email
+    app.get("/forest/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const result = await forestCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // inset a document
     app.post("/forest", async (req, res) => {
       const newForest = req.body;
