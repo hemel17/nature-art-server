@@ -28,10 +28,17 @@ async function run() {
     await client.connect();
 
     const forestCollection = client.db("forestDB").collection("forest");
+    const userArtCollection = client.db("forestDB").collection("userArt");
 
     // find all documents
     app.get("/forest", async (req, res) => {
       const result = await forestCollection.find().toArray();
+      res.send(result);
+    });
+
+    // find all user art documents
+    app.get("/userArt", async (req, res) => {
+      const result = await userArtCollection.find().toArray();
       res.send(result);
     });
 
@@ -44,12 +51,12 @@ async function run() {
       res.send(result);
     });
 
-    // find user document by email
-    app.get("/forest/:email", async (req, res) => {
-      const email = req.params.email;
-      console.log(email);
-      const query = { email: email };
-      const result = await forestCollection.find(query).toArray();
+    // find a user art document
+    app.get("/userArt/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await userArtCollection.findOne(query);
       res.send(result);
     });
 
@@ -61,12 +68,55 @@ async function run() {
       res.send(result);
     });
 
+    // inset a user art document
+    app.post("/userArt", async (req, res) => {
+      const newArt = req.body;
+      console.log(newArt);
+      const result = await userArtCollection.insertOne(newArt);
+      res.send(result);
+    });
+
     // delete a doucment
     app.delete("/forest/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await forestCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // delete a user art doucment
+    app.delete("/userArt/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await userArtCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // update a user art document
+    app.put("/userArt/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedArt = req.body;
+      const art = {
+        $set: {
+          email: updatedArt.email,
+          name: updatedArt.displayName,
+          customization: updatedArt.customization,
+          image: updatedArt.image,
+          item_name: updatedArt.item_name,
+          subcategory_name: updatedArt.subcategory_name,
+          price: updatedArt.price,
+          rating: updatedArt.rating,
+          short_description: updatedArt.short_description,
+          processing_time: updatedArt.processing_time,
+          stock_status: updatedArt.stock_status,
+        },
+      };
+      const result = await userArtCollection.updateOne(filter, art, options);
       res.send(result);
     });
 
