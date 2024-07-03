@@ -28,11 +28,43 @@ async function run() {
     await client.connect();
 
     const forestCollection = client.db("forestDB").collection("forest");
+    const abstractCollection = client.db("forestDB").collection("abstract");
+    const architectureCollection = client
+      .db("forestDB")
+      .collection("architecture");
+    const floralCollection = client.db("forestDB").collection("floral");
+    const mountainCollection = client.db("forestDB").collection("mountain");
+    const realisticCollection = client.db("forestDB").collection("realistic");
     const userArtCollection = client.db("forestDB").collection("userArt");
 
     // find all documents
     app.get("/forest", async (req, res) => {
       const result = await forestCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/abstract", async (req, res) => {
+      const result = await abstractCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/architecture", async (req, res) => {
+      const result = await architectureCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/floral", async (req, res) => {
+      const result = await floralCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/mountain", async (req, res) => {
+      const result = await mountainCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/realistic", async (req, res) => {
+      const result = await realisticCollection.find().toArray();
       res.send(result);
     });
 
