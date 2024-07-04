@@ -83,6 +83,46 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/abstract/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await abstractCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/architecture/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await architectureCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/floral/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await floralCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/mountain/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await mountainCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/realistic/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await realisticCollection.findOne(query);
+      res.send(result);
+    });
+
     // find a user art document
     app.get("/userArt/:id", async (req, res) => {
       const id = req.params.id;
