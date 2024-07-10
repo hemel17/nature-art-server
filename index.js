@@ -5,10 +5,14 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
-// middleware
+// Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://nature-art-8a756.web.app",
+      "https://nature-art-8a756.firebaseapp.com",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
@@ -25,8 +29,7 @@ app.use(
 );
 app.use(express.json());
 
-// mongoDB connect
-
+// MongoDB connection URI
 const uri = `mongodb+srv://${process.env.USER}:${process.env.PASS}@cluster0.vgu9onq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -40,190 +43,143 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+    // Connect the client to the server
     // await client.connect();
+    console.log("Connected to MongoDB!");
 
-    const forestCollection = client.db("forestDB").collection("forest");
-    const abstractCollection = client.db("forestDB").collection("abstract");
-    const architectureCollection = client
-      .db("forestDB")
-      .collection("architecture");
-    const floralCollection = client.db("forestDB").collection("floral");
-    const mountainCollection = client.db("forestDB").collection("mountain");
-    const realisticCollection = client.db("forestDB").collection("realistic");
-    const userArtCollection = client.db("forestDB").collection("userArt");
+    const db = client.db("forestDB");
+    const collections = {
+      forest: db.collection("forest"),
+      abstract: db.collection("abstract"),
+      architecture: db.collection("architecture"),
+      floral: db.collection("floral"),
+      mountain: db.collection("mountain"),
+      realistic: db.collection("realistic"),
+      userArt: db.collection("userArt"),
+    };
 
-    // find all documents
-    app.get("/forest", async (req, res) => {
-      const result = await forestCollection.find().toArray();
-      res.send(result);
-    });
+    // Generic function to handle GET requests for collections
+    const handleGetCollection = (collectionName) => async (req, res) => {
+      try {
+        const result = await collections[collectionName].find().toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    };
 
-    app.get("/abstract", async (req, res) => {
-      const result = await abstractCollection.find().toArray();
-      res.send(result);
-    });
+    // Routes for fetching all documents in collections
+    app.get("/forest", handleGetCollection("forest"));
+    app.get("/abstract", handleGetCollection("abstract"));
+    app.get("/architecture", handleGetCollection("architecture"));
+    app.get("/floral", handleGetCollection("floral"));
+    app.get("/mountain", handleGetCollection("mountain"));
+    app.get("/realistic", handleGetCollection("realistic"));
+    app.get("/userArt", handleGetCollection("userArt"));
 
-    app.get("/architecture", async (req, res) => {
-      const result = await architectureCollection.find().toArray();
-      res.send(result);
-    });
+    // Generic function to handle GET requests for individual documents
+    const handleGetDocument = (collectionName) => async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await collections[collectionName].findOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    };
 
-    app.get("/floral", async (req, res) => {
-      const result = await floralCollection.find().toArray();
-      res.send(result);
-    });
+    // Routes for fetching individual documents
+    app.get("/forest/:id", handleGetDocument("forest"));
+    app.get("/abstract/:id", handleGetDocument("abstract"));
+    app.get("/architecture/:id", handleGetDocument("architecture"));
+    app.get("/floral/:id", handleGetDocument("floral"));
+    app.get("/mountain/:id", handleGetDocument("mountain"));
+    app.get("/realistic/:id", handleGetDocument("realistic"));
+    app.get("/userArt/:id", handleGetDocument("userArt"));
 
-    app.get("/mountain", async (req, res) => {
-      const result = await mountainCollection.find().toArray();
-      res.send(result);
-    });
-
-    app.get("/realistic", async (req, res) => {
-      const result = await realisticCollection.find().toArray();
-      res.send(result);
-    });
-
-    // find all user art documents
-    app.get("/userArt", async (req, res) => {
-      const result = await userArtCollection.find().toArray();
-      res.send(result);
-    });
-
-    // find a document
-    app.get("/forest/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await forestCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/abstract/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await abstractCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/architecture/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await architectureCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/floral/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await floralCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/mountain/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await mountainCollection.findOne(query);
-      res.send(result);
-    });
-
-    app.get("/realistic/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await realisticCollection.findOne(query);
-      res.send(result);
-    });
-
-    // find a user art document
-    app.get("/userArt/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await userArtCollection.findOne(query);
-      res.send(result);
-    });
-
-    // inset a document
+    // Insert a document
     app.post("/forest", async (req, res) => {
-      const newForest = req.body;
-      console.log(newForest);
-      const result = await forestCollection.insertOne(newForest);
-      res.send(result);
+      try {
+        const newForest = req.body;
+        const result = await collections.forest.insertOne(newForest);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     });
 
-    // inset a user art document
+    // Insert a user art document
     app.post("/userArt", async (req, res) => {
-      const newArt = req.body;
-      console.log(newArt);
-      const result = await userArtCollection.insertOne(newArt);
-      res.send(result);
+      try {
+        const newArt = req.body;
+        const result = await collections.userArt.insertOne(newArt);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     });
 
-    // delete a doucment
-    app.delete("/forest/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await forestCollection.deleteOne(query);
-      res.send(result);
-    });
+    // Delete a document
+    const handleDeleteDocument = (collectionName) => async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await collections[collectionName].deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    };
 
-    // delete a user art doucment
-    app.delete("/userArt/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { _id: new ObjectId(id) };
-      const result = await userArtCollection.deleteOne(query);
-      res.send(result);
-    });
+    app.delete("/forest/:id", handleDeleteDocument("forest"));
+    app.delete("/userArt/:id", handleDeleteDocument("userArt"));
 
-    // update a user art document
+    // Update a user art document
     app.put("/userArt/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updatedArt = req.body;
-      const art = {
-        $set: {
-          email: updatedArt.email,
-          name: updatedArt.displayName,
-          customization: updatedArt.customization,
-          image: updatedArt.image,
-          item_name: updatedArt.item_name,
-          subcategory_name: updatedArt.subcategory_name,
-          price: updatedArt.price,
-          rating: updatedArt.rating,
-          short_description: updatedArt.short_description,
-          processing_time: updatedArt.processing_time,
-          stock_status: updatedArt.stock_status,
-        },
-      };
-      const result = await userArtCollection.updateOne(filter, art, options);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const updatedArt = req.body;
+        const updateDoc = {
+          $set: {
+            email: updatedArt.email,
+            name: updatedArt.displayName,
+            customization: updatedArt.customization,
+            image: updatedArt.image,
+            item_name: updatedArt.item_name,
+            subcategory_name: updatedArt.subcategory_name,
+            price: updatedArt.price,
+            rating: updatedArt.rating,
+            short_description: updatedArt.short_description,
+            processing_time: updatedArt.processing_time,
+            stock_status: updatedArt.stock_status,
+          },
+        };
+        const result = await collections.userArt.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     });
 
-    // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    // Handle the root route
+    app.get("/", (req, res) => {
+      res.send("Nature art server is running");
+    });
+
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is running at port: ${port}`);
+    });
+  } catch (error) {
+    console.error(error);
   }
 }
+
 run().catch(console.dir);
-
-app.get("/", (req, res) => {
-  res.send("nature art server is running");
-});
-
-app.listen(port, () => {
-  console.log(`server is running at port : ${port}`);
-});
